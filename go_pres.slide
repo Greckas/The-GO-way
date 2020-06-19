@@ -1,0 +1,495 @@
+The GO way
+18 June 2020
+
+Yuriy Hrytsak, Golang Developer at Conscensia (Navico team)
+
+greckasus@gmail.com
+
+http://golang.org/
+
+
+
+*  Short about me
+
+I am Golang developer with the 3 years of commercial experience and 4 successfully working projects in Go.
+
+Before I switched to Golang, I have worked with Java and Python for a two years.
+
+.image avatar.jpg 430 300
+
+* Who uses Golang?
+.image who.jpeg
+
+* Where?
+.image where.png _ 700
+
+*  Brief agenda
+
+
+1) _What_ _makes_ _GO_ _successful_
+
+2) _Features_ _in_ _GO_
+
+3) _GO's_ _goals_
+
+4) _Best_ _practices_
+
+5) _Tests_ _and_ _benchmarks_
+
+6) _Summary_ _and_ _QA_
+
+* 1) What makes GO successful?
+
+Many reasons cited:
+
+- speed of compilation
+- speed of execution
+- deployment
+- tools
+- libraries
+
+These are not language features.
+Less often cited: true language features such as interfaces or concurrency.
+
+All are important but not really an answer.
+
+* Simplicity
+
+My answer: Simplicity.
+
+Go is simple, at least compared to established languages.
+
+Simplicity has many facets.
+
+Simplicity is complicated.
+
+* 2)Features in Go
+Go is different.
+
+Go does not try to be like the other languages.
+
+Go does not compete on features.
+
+As of Go 1, the language is fixed.
+
+Many newcomers to Go ask for features from languages they know.
+But those features do not belong in Go—and the language is fixed.
+
+Adding features to Go would not make it better, just bigger.
+
+That would make Go less interesting by being less different.
+
+* But you need features!
+Of course, there must be some features.
+
+But which ones? The right ones!
+
+Design by consensus.
+
+* Readability
+If a language has too many features, you waste time choosing which ones to use.
+Then implement, refine, possibly rethink and redo.
+
+Later, "Why does the code work this way?"
+
+The code is harder to understand simply because it is using a more complex language.
+
+Preferable to have just one way, or at least fewer, simpler ways.
+
+Features add complexity. We want simplicity.
+
+Features hurt readability. We want readability.
+
+Readability is paramount.
+
+* Readable means Reliable
+Readable code is reliable code.
+
+It's easier to understand.
+
+It's easier to work on.
+
+If it breaks, it's easier to fix.
+
+If the language is complicated:
+
+- You must understand more things to read and work on the code.
+- You must understand more things to debug and fix it.
+A key tradeoff: More fun to write, or less work to maintain?
+
+* The right set of features
+Not features for features' sake.
+
+Features that "cover the space", like a vector basis covering solution space.
+
+Orthogonal features that interact predictably.
+
+Simple features that interact in simple ways.
+
+Simplicity comes from orthogonality and predictability.
+
+Keep the language's goals in mind.
+
+* 3) Go's goals
+Clean procedural language designed for scalable cloud software.
+
+Composable distinct elements, including:
+
+- concrete data types
+- functions and methods
+- interfaces
+- packages
+- concurrency
+Plus: Good tools, fast builds.
+
+All the pieces feel simple in practice.
+
+* Simple can be expressive
+
+.image gopherslide2smblue.jpg 450 380
+
+* Don't need all those features
+They add complexity without clarity.
+
+.image complex.jpg 550 800
+
+* Simplicity
+Go is actually complex, but it _feels_ simple.
+
+Interacting elements must mesh seamlessly, without surprises.
+
+Requires a lot of design, implementation work, refinement.
+
+Simplicity is the art of hiding complexity.
+
+* A few simple things in Go
+- garbage collection
+- goroutines
+- constants
+- interfaces
+- packages
+Each hides complexity behind a simple facade.
+
+* Garbage collection
+Perhaps the best example of simplicity hiding complexity.
+
+Very difficult to implement well, but worth it.
+Yet so simple the language specification mentions it only in the introduction.
+Nonetheless, parts of the language strongly influenced by it.
+
+Code is simpler because GC is there.
+Design does not need to include "ownership".
+
+Go: there is no free. There is only garbage collection.
+As simple as it can be. (But complex behind the facade.)
+
+* Concurrency
+Concurrency is the ability to write your program as independently executing pieces.
+In Go, concurrency has three elements:
+
+- goroutines (execution)
+- channels (communication)
+- select (coordination)
+Let's talk about goroutines.
+
+* Goroutines
+Start a goroutine with the go keyword:
+
+  go function(args)
+Three extra keystrokes ('g', 'o', ' '). Hard to be much simpler.
+
+Like garbage collection, eliminate considerations from the programmer's concern:
+
+- no stack size
+- no return or completion status
+- no mechanism for management
+- no "ID"
+These are things other systems would provide. Go instead has a minimalist design.
+
+Implementation complex, dependent on garbage collection for stack management.
+
+* Constants
+In Go, constants are just numbers, even though (because) it is strongly typed.
+
+  var nanosecond = time.Second/1e9
+Simple idea took about a year to work out. Difficulties:
+
+- "infinite" precision integers
+- "infinite" precision floating point (tried and failed with rationals)
+- promotion rules (i := 2; f := 2.0; g := 1/2; h := 1/2.0)
+- corner cases like shift
+
+* Interfaces
+Just a set of methods. No data. Simple idea, but more complex than expected.
+
+  type Reader interface {
+      Read([]byte) (int, error)
+  }
+Also need variables of that type (var reader io.Reader).
+These variables add dynamic typing to a statically typed language.
+
+  var r Reader = os.Stdin // Statically checked.
+  var x interface{} = os.Stdin // Statically checked.
+  r = x.(Reader) // Dynamically checked. Must be explicit here - design decision.
+Requires careful design. Interface assignment must be implemented at run time (not a v-table). What if it fails? Led to type assertions and the "comma, ok" idiom.
+
+More complexity crept in. Type assertions and type switches were not in the original plan.
+
+* Interfaces
+Go's most distinctive and powerful feature.
+
+Profound effect on library design.
+
+Enables true component architectures. Prime examples are io.Reader and io.Writer, generalizations of the Unix pipe idea.
+
+Feel simple, worth the complexity.
+
+* Packages
+A design for structuring programs and libraries.
+
+  package big
+  ...
+  import "math/big"
+Took a long time to design. Enable componentization, scalability, sharing, data hiding and isolation, ...
+
+Affect program design, syntax, naming, building, linking, testing, ...
+
+Separation of package path ("math/big") from package name (big).
+Enabled the go get mechanism.
+
+Intricate to implement yet natural to use.
+
+After garbage collection, perhaps the highest ratio of true complexity to apparent simplicity, and therefore of the power of simplicity to hide complexity.
+
+* Hidden complexity
+Unicode and UTF-8 handled seamlessly.
+
+Packages imported and used easily.
+
+Function promoted to method (HandleFunc).
+
+Truly concurrent—server won't block.
+
+Production ready.
+
+All very simple.
+
+* GO imperfections
+
+*No* *Generics*
+  Go doesn’t have generics. This is a big hurdle to get over when coming from languages like Java. It means a decreased level of reuse in your code. While Go has first-class functions, if you write functions like “map”, “reduce”, or “filter” that operates on a collection of one type, you can’t reuse those same functions for a collection of a different type.
+*Interfaces* *Are* *Implicit*
+  While having interfaces is great, structs implement interfaces implicitly, not explicitly. This is stated as a strength of Go, but we found that it’s difficult to tell from looking at a struct whether or not it implements an interface. You can only really know by attempting to compile the program. This is fine if the program is small, but not if it’s a medium to large size.
+*Poor* *Library* *Support*
+*Fractured* *Dependency* *Management*
+For a long time Go did not have a stable, official package manager. But now has _godep._  Also, virtually all package management is backed by Git repositories, the history of which could change at any time.
+
+
+* Conclusion
+Simplicity is hard—to design.
+
+Simplicity is complicated—to build.
+
+But if you get it right...
+
+Simplicity is easy—to use.
+
+The success of Go proves it.
+
+* 4) Best practices
+
+From Wikipedia:
+
+  "A best practice is a method or technique that has consistently shown results superior
+  to those achieved with other means"
+
+.image walk_gopher.png 400 300
+
+* Some code
+  type Gopher struct {
+    Name     string
+    AgeYears int
+  }
+
+  func (g *Gopher) WriteTo(w io.Writer) (size int64, err error) {
+    err = binary.Write(w, binary.LittleEndian, int32(len(g.Name)))
+    if err == nil {
+        size += 4
+        var n int
+        n, err = w.Write([]byte(g.Name))
+        size += int64(n)
+        if err == nil {
+            err = binary.Write(w, binary.LittleEndian, int64(g.AgeYears))
+            if err == nil {
+                size += 4
+            }
+            return
+        }
+        return
+    }
+    return
+  }
+
+* Avoid nesting by handling errors first
+  func (g *Gopher) WriteTo(w io.Writer) (size int64, err error) {
+    err = binary.Write(w, binary.LittleEndian, int32(len(g.Name)))
+    if err != nil {
+        return
+    }
+    size += 4
+    n, err := w.Write([]byte(g.Name))
+    size += int64(n)
+    if err != nil {
+        return
+    }
+    err = binary.Write(w, binary.LittleEndian, int64(g.AgeYears))
+    if err == nil {
+        size += 4
+    }
+    return
+  }
+Less nesting means less cognitive load on the reader
+
+* Avoid repetition when possible
+Bad example:
+
+    package models
+    type User struct {...}
+    type Task struct {...}
+
+    func GetUser(uid string) (*User, error) {
+      user := User{Id: id}
+      if err := ORM.Read(&user); err != nil {
+          return nil, err
+      }
+      return &user, nil
+    }
+
+    func GetTask(uid string) (*Task, error) {
+      task := Task{Id: id}
+      if err := ORM.Read(&task); err != nil {
+          return nil, err
+      }
+      return &task, nil
+    }
+
+* Good example
+    // GetByID loads the model for dst's concrete type based on its Id field using ORM.Read
+    func GetByID(dst interface{}) error {
+        if err := ORM.Read(dst); err != nil {
+            return nil, err
+        }
+        return nil
+    }
+
+* Type switch to handle special cases
+  func (w *binWriter) Write(v interface{}) {
+    if w.err != nil {
+        return
+    }
+    switch x := v.(type) {
+    case string:
+        w.Write(int32(len(x)))
+        w.Write([]byte(x))
+    case int:
+        w.Write(int64(x))
+    default:
+        if w.err = binary.Write(w.w, binary.LittleEndian, v); w.err == nil {
+            w.size += int64(binary.Size(v))
+        }
+    }
+  }
+
+* Shorter naming is better
+or at least longer is not always better.
+
+Try to find the shortest name that is self explanatory.
+
+Prefer *MarshalIndent* to *MarshalWithIndentation.*
+Don't forget that the package name will appear before the identifier you chose.
+
+In package encoding/json we find the type Encoder, not JSONEncoder.
+It is referred as json.Encoder.
+
+* 5) Testing and benchmarking
+*Testing*
+
+Package testing provides support for automated testing of Go packages. It is intended to be used in concert with the “go test” command, which automates execution of any function of the form
+
+  func TestXxx(*testing.T)
+where Xxx does not start with a lowercase letter. The function name serves to identify the test routine.
+
+Within these functions, use the Error, Fail or related methods to signal failure.
+
+A simple test function looks like this:
+
+  func TestAbs(t *testing.T) {
+    got := Abs(-1)
+    if got != 1 {
+        t.Errorf("Abs(-1) = %d; want 1", got)
+    }
+  }
+
+* Benchmarks
+Functions of the form
+
+  func BenchmarkXxx(*testing.B)
+are considered benchmarks, and are executed by the "go test" command when its -bench flag is provided. Benchmarks are run sequentially.
+A sample benchmark function looks like this:
+
+  func BenchmarkHello(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        fmt.Sprintf("hello")
+    }
+  }
+The benchmark function must run the target code b.N times. During benchmark execution, b.N is adjusted until the benchmark function lasts long enough to be timed reliably. The output
+
+  BenchmarkHello    10000000    282 ns/op
+means that the loop ran 10000000 times at a speed of 282 ns per loop.
+
+* Benchmarking various inputs
+As the original Fib function is the classic recursive implementation, we’d expect it to exhibit exponential behavior as the input grows. We can explore this by rewriting our benchmark slightly using a pattern that is very common in the Go standard library.
+
+  func benchmarkFib(i int, b *testing.B) {
+        for n := 0; n < b.N; n++ {
+                Fib(i)
+        }
+  }
+
+  func BenchmarkFib1(b *testing.B)  { benchmarkFib(1, b) }
+  func BenchmarkFib2(b *testing.B)  { benchmarkFib(2, b) }
+  func BenchmarkFib3(b *testing.B)  { benchmarkFib(3, b) }
+  func BenchmarkFib10(b *testing.B) { benchmarkFib(10, b) }
+  func BenchmarkFib20(b *testing.B) { benchmarkFib(20, b) }
+  func BenchmarkFib40(b *testing.B) { benchmarkFib(40, b) }
+* Result:
+
+  BenchmarkFib1   1000000000               2.84 ns/op
+  BenchmarkFib2   500000000                7.92 ns/op
+  BenchmarkFib3   100000000               13.0 ns/op
+  BenchmarkFib10   5000000               447 ns/op
+  BenchmarkFib20     50000             55668 ns/op
+  BenchmarkFib40         2         942888676 ns/op
+
+* Summary
+
+GO is very fast! (Compiling, execution, deploying)
+GO is simple! (Easy to read -> easy to maintain -> Reliable)
+GO has his own stable features and doesn't want to steal others
+GO has all needed tools and good community to help
+GO is OOP but not exactly
+GO has no problem with package version dependencies
+GO has no exceptions!
+GO has build-in concurrency
+GO code is easy to test and easy find performance issues
+
+*So,* *are* *you* *ready* *to* *GO?*
+
+
+* Thanks to
+.image reception.jpg
+
+* Q&A
+
+.image questions.jpg
+
